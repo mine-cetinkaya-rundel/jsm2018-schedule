@@ -1,0 +1,13 @@
+name: jsm2018-schedule
+title:
+username:
+account: minecr
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 387662
+bundleId: 1500084
+url: https://minecr.shinyapps.io/jsm2018-schedule/
+when: 1532541410.96748
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: code.R|data/jsm2018.html
