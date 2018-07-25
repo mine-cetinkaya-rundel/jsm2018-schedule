@@ -98,13 +98,6 @@ jsm_talks_raw <- tibble(
 )
 
 jsm_talks <- jsm_talks_raw %>%
-  mutate(
-    has_R       = str_detect(title, " R | R$"),
-    has_tidy    = str_detect(title, "[tT]idy"),
-    has_shiny   = str_detect(title, "[sS]hiny"),
-    has_python  = str_detect(title, "[pP]ython"),
-    has_rstudio = str_detect(title, "RStudio|R Studio"),
-    has_fee     = str_detect(title, "(ADDED FEE)")
-  )
+  mutate(has_fee = str_detect(title, "(ADDED FEE)"))
 
 write_csv(jsm_talks, "data/jsm2018_talks.csv")
