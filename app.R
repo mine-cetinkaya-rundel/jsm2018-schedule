@@ -2,6 +2,7 @@
 library(shiny)
 library(tidyverse)
 library(DT)
+library(glue)
 
 # Load data ---------------------------------------------------------
 jsm_sessions <- read_csv("data/jsm2018_sessions.csv")
