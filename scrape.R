@@ -72,8 +72,8 @@ jsm_sessions <- jsm_sessions_raw %>%
       TRUE                                         ~ type
     ),
     # civilian to military time
-    beg_time_round = format(strptime(beg_time, "%I:%M %p"), format="%H:%M:%S") %>% str_remove("\\:.+") %>% as.numeric(),
-    end_time_round = format(strptime(end_time, "%I:%M %p"), format="%H:%M:%S") %>% str_remove("\\:.+") %>% as.numeric(),
+    beg_time_round = format(strptime(beg_time, "%I:%M %p"), format = "%H:%M:%S") %>% str_remove("\\:.+") %>% as.numeric(),
+    end_time_round = format(strptime(end_time, "%I:%M %p"), format = "%H:%M:%S") %>% str_remove("\\:.+") %>% as.numeric(),
     end_time_round = ifelse(str_detect(end_time, "\\:[1-5]"), end_time_round+1, end_time_round),
     # for convenience
     end_time_round = ifelse(id == "216596", 23, end_time_round)
