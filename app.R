@@ -151,15 +151,21 @@ server <- function(input, output) {
   output$schedule <- DT::renderDataTable({
     # Require inputs ------------------------------------------------
     req(input$day)
-    req(input$type)
+    
     # Wrangle sponsor text ------------------------------------------
     sponsor_string <- glue_collapse(input$sponsors, sep = "|")
-    cat(paste(sponsor_string, "\n"))
+    if (length(sponsor_string) == 0)
+      sponsor_string <- ".*"
+    
+    session_type <- input$type
+    if (length(session_type) == 0)
+      session_type <- types
+    
     # Filter and tabulate data --------------------------------------
     jsm_sessions %>%
       filter(
         day %in% input$day,
-        type %in% input$type,
+        type %in% session_type,
         beg_time_round >= input$time[1],
         end_time_round <= input$time[2],
         str_detect(sponsor, sponsor_string)
