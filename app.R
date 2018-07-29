@@ -72,7 +72,7 @@ ui <- navbarPage(
                
                # Select sponsor(s) ----------------------------------
                selectInput(
-                 "sponsors",
+                 "sponsor",
                  "Session sponsor",
                  choices = sponsors,
                  selected = c(
@@ -89,7 +89,6 @@ ui <- navbarPage(
                  "type",
                  "Type of session",
                  choices = types,
-                 selected = str_subset(types, "Invited"),
                  multiple = TRUE,
                  selectize = TRUE
                ),
@@ -149,11 +148,12 @@ server <- function(input, output) {
   
   # Sessions --------------------------------------------------------
   output$schedule <- DT::renderDataTable({
+
     # Require inputs ------------------------------------------------
     req(input$day)
     
     # Wrangle sponsor text ------------------------------------------
-    sponsor_string <- glue_collapse(input$sponsors, sep = "|")
+    sponsor_string <- glue_collapse(input$sponsor, sep = "|")
     if (length(sponsor_string) == 0)
       sponsor_string <- ".*"
     
