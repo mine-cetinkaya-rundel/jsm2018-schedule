@@ -16,7 +16,7 @@ ui <- navbarPage(
   tabPanel("Session Schedule",
            sidebarLayout(
              sidebarPanel(
-               HTML(
+               h4(
                  "Select day(s) and sponsor(s) to get started. Scroll
                  down to limit session types."
                ),
@@ -95,9 +95,11 @@ ui <- navbarPage(
   tabPanel("Talk Finder",
            sidebarLayout(
              sidebarPanel(
+               h4("Search for keywords in talk/workshop titles:"),
+               
                # Keyword selection -------------------------------------------
                checkboxGroupInput("keyword_choice",
-                                  "Select keywords you're interested in:",
+                                  "Select keywords you're interested in",
                                   choices = c(
                                     "R"       = "( R | R$)", 
                                     "tidy"    = "tidy", 
@@ -108,7 +110,7 @@ ui <- navbarPage(
                
                # Other -------------------------------------------------------
                textInput("keyword_text", 
-                         "Add additional keywords or phrases separated by commas:"),
+                         "Add additional keywords or phrases separated by commas"),
                
                br(),
                
