@@ -23,6 +23,14 @@ types <- jsm_sessions %>%
   arrange() %>%
   pull()
 
+types <- c(
+  keep(types, str_detect, pattern = "^Invited") %>% sort(),
+  keep(types, str_detect, pattern = "^Topic") %>% sort(),
+  keep(types, str_detect, pattern = "^Contributed") %>% sort(),
+  discard(types, str_detect, pattern = "^Invited|^Topic|^Contributed|^Other") %>% sort(),
+  "Other"
+)
+
 # UI ----------------------------------------------------------------
 ui <- navbarPage(
   theme = shinytheme("cosmo"),
