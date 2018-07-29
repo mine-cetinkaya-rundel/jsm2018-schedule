@@ -4,6 +4,7 @@ library(tidyverse)
 library(DT)
 library(glue)
 library(lubridate)
+library(shinythemes)
 
 # Load data ---------------------------------------------------------
 jsm_sessions <- read_csv("data/jsm2018_sessions.csv")
@@ -24,6 +25,7 @@ types <- jsm_sessions %>%
 
 # UI ----------------------------------------------------------------
 ui <- navbarPage(
+  theme = shinytheme("cosmo"),
   "JSM 2018",
   
   # Tab 1: Session schedule -----------------------------------------
@@ -37,7 +39,7 @@ ui <- navbarPage(
                # Select day(s) --------------------------------------
                checkboxGroupInput(
                  "day",
-                 "Day(s)",
+                 "Day",
                  choices = c(
                    "Fri, Jul 27" = "Fri",
                    "Sat, Jul 28" = "Sat",
@@ -50,9 +52,10 @@ ui <- navbarPage(
                  selected = wday(Sys.Date(), label = TRUE, abbr = TRUE)
                ),
                
+               # Select times ---------------------------------------
                sliderInput(
                  "time",
-                 "Time range",
+                 "Time",
                  min = 7,
                  max = 23,
                  value = c(8, 18),
@@ -62,7 +65,7 @@ ui <- navbarPage(
                # Select sponsor(s) ----------------------------------
                selectInput(
                  "sponsors",
-                 "Select sponsors",
+                 "Session sponsor",
                  choices = sponsors,
                  selected = c(
                    "Section on Statistical Education",
@@ -76,7 +79,7 @@ ui <- navbarPage(
                # Select typess ------------------------------------
                selectInput(
                  "type",
-                 "Type(s)",
+                 "Type of session",
                  choices = types,
                  selected = str_subset(types, "Invited"),
                  multiple = TRUE,
