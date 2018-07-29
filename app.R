@@ -55,7 +55,7 @@ ui <- navbarPage(
                  "Time range",
                  min = 7,
                  max = 23,
-                 value = c(7, 23),
+                 value = c(8, 18),
                  step = 1
                ),
                
@@ -64,7 +64,11 @@ ui <- navbarPage(
                  "sponsors",
                  "Select sponsors",
                  choices = sponsors,
-                 selected = "Section on Statistical Education",
+                 selected = c(
+                   "Section on Statistical Education",
+                   "Section on Statistical Computing",
+                   "Section on Statistical Graphics"
+                 ),
                  multiple = TRUE,
                  selectize = TRUE
                ),
