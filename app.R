@@ -93,6 +93,12 @@ ui <- navbarPage(
                  selectize = TRUE
                ),
                
+               br(),
+               
+               # Excluded fee events --------------------------------
+               checkboxInput("exclude_fee",
+                             "Exclude added fee events"),
+               
                width = 3
              ),
              
@@ -161,6 +167,11 @@ server <- function(input, output) {
     if (length(session_type) == 0)
       session_type <- types
     
+    # Exclude fee events --------------------------------------------
+    if (input$exclude_fee) {
+      jsm_sessions <- jsm_sessions %>% filter(has_fee == FALSE)
+    }
+    
     # Filter and tabulate data --------------------------------------
     jsm_sessions %>%
       filter(
@@ -220,7 +231,7 @@ server <- function(input, output) {
       DT::datatable(
         rownames = FALSE,
         escape = FALSE,
-        options = list(dom = "tp")
+        options = list(dom = "ltp")
       )
     
   })

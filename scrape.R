@@ -57,6 +57,8 @@ jsm_sessions <- jsm_sessions_raw %>%
   separate(session_type, into = c("session", "type"), sep = " \u2014 ") %>%
   # manual fixes
   mutate(
+    # has fee
+    has_fee = str_detect(session, "(ADDED FEE)"),
     # data error
     end_time = ifelse(id == "581", "3:50 PM", end_time),
     # compose URLs

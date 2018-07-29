@@ -5,9 +5,9 @@ account: minecr
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 387662
-bundleId: 1506284
+bundleId: 1506309
 url: https://minecr.shinyapps.io/jsm2018-schedule/
-when: 1532901182.17857
+when: 1532903069.81428
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: data/jsm2018.html
