@@ -95,22 +95,22 @@ ui <- navbarPage(
   tabPanel("Talk Finder",
            sidebarLayout(
              sidebarPanel(
-               HTML("Select keywords you're interested in, or add your own:"),
-               br(),
                # Keyword selection -------------------------------------------
                checkboxGroupInput("keyword_choice",
-                                  "",
+                                  "Select keywords you're interested in:",
                                   choices = c(
-                                    "R"       = " R | R$", 
-                                    "tidy"    = "[tT]idy", 
-                                    "Shiny"   = "[sS]hiny", 
-                                    "RStudio" = "RStudio|R Studio", 
-                                    "Python"  = "[pP]ython"),
-                                  selected = " R | R$"),
+                                    "R"       = "( R | R$)", 
+                                    "tidy"    = "tidy", 
+                                    "Shiny"   = "shiny", 
+                                    "RStudio" = "(RStudio|R Studio)", 
+                                    "Python"  = "python"),
+                                  selected = "( R | R$)"),
                
                # Other -------------------------------------------------------
-               textInput("keyword_text",
-                         "Other keywords"),
+               textInput("keyword_text", 
+                         "Add additional keywords or phrases separated by commas:"),
+               
+               br(),
                
                # Excluded fee events -----------------------------------------
                checkboxInput("exclude_fee",
@@ -164,20 +164,36 @@ server <- function(input, output) {
   
   # Talks -----------------------------------------------------------
   output$talks <- DT::renderDataTable({
-    keyword_choice_string <- glue_collapse(input$keyword_choice, sep = "|")
-    keyword_string <- ifelse(input$keyword_text == "", 
-                             keyword_choice_string,
-                             glue(keyword_choice_string, input$keyword_string, .sep = "|"))
-
+    
+    # Exclude fee events
     if (input$exclude_fee) {
       jsm_talks <- jsm_talks %>% filter(has_fee == FALSE)
     }
     
+    # Create pattern
+    keywords <- input$keyword_text %>%
+      str_split(",") %>%
+      pluck(1) %>%
+      str_trim() %>%
+      discard(~.x == "")
+    
+    keyword_regex <- c(input$keyword_choice, keywords)
+
+    if (length(keyword_regex) == 0){
+      keyword_regex = ""
+    }
+    
+    matching_titles <- keyword_regex %>%
+      tolower() %>%
+      map(str_detect, string=tolower(jsm_talks$title)) %>%
+      reduce(`&`)
+    
+    # Subset for pattern
     jsm_talks %>%
-      filter(str_detect(title, keyword_string)) %>%
+      filter(matching_titles) %>%
       mutate(title = glue('<a href="{url}">{title}</a>')) %>%
       select(title) %>%
-      DT::datatable(rownames = FALSE, escape = FALSE)
+      DT::datatable(rownames = FALSE, escape = FALSE, options = list(dom = "tp"))
     
   })
 }
