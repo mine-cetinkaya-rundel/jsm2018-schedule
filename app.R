@@ -28,11 +28,11 @@ ui <- navbarPage(
                  "day",
                  "Day(s)",
                  choices = c(
-                   "Fri, Jun 27" = "Fri",
-                   "Sat, Jun 28" = "Sat",
-                   "Sun, Jun 29" = "Sun",
-                   "Mon, Jun 30" = "Mon",
-                   "Tue, Jun 31" = "Tue",
+                   "Fri, Jul 27" = "Fri",
+                   "Sat, Jul 28" = "Sat",
+                   "Sun, Jul 29" = "Sun",
+                   "Mon, Jul 30" = "Mon",
+                   "Tue, Jul 31" = "Tue",
                    "Wed, Aug 1"  = "Wed",
                    "Thu, Aug 2"  = "Thu"
                  ),
