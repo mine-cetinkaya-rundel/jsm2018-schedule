@@ -3,10 +3,24 @@ library(shiny)
 library(tidyverse)
 library(DT)
 library(glue)
+library(lubridate)
 
 # Load data ---------------------------------------------------------
 jsm_sessions <- read_csv("data/jsm2018_sessions.csv")
 jsm_talks <- read_csv("data/jsm2018_talks.csv")
+
+# Create lists for use later ----------------------------------------
+sponsors <- glue_collapse(jsm_sessions$sponsor, sep = ", ") %>%
+  str_split(", ") %>%
+  pluck(1) %>%
+  str_trim() %>%
+  unique() %>%
+  sort()
+
+types <- jsm_sessions %>%
+  distinct(type) %>%
+  arrange() %>%
+  pull()
 
 # UI ----------------------------------------------------------------
 ui <- navbarPage(
@@ -16,14 +30,11 @@ ui <- navbarPage(
   tabPanel("Session Schedule",
            sidebarLayout(
              sidebarPanel(
-               h4(
-                 "Select day(s) and sponsor(s) to get started. Scroll
-                 down to limit session types."
-               ),
-               br(),
+               # Instructions ---------------------------------------
+               h4("Select date/time, sponsors, and type of session."),
                br(),
                
-               # Select day(s) -----------------------
+               # Select day(s) --------------------------------------
                checkboxGroupInput(
                  "day",
                  "Day(s)",
@@ -36,7 +47,7 @@ ui <- navbarPage(
                    "Wed, Aug 1"  = "Wed",
                    "Thu, Aug 2"  = "Thu"
                  ),
-                 selected = "Sun"
+                 selected = wday(Sys.Date(), label = TRUE, abbr = TRUE)
                ),
                
                sliderInput(
@@ -44,39 +55,34 @@ ui <- navbarPage(
                  "Time range",
                  min = 7,
                  max = 23,
-                 value = c(8, 12),
+                 value = c(7, 23),
                  step = 1
                ),
                
-               # Select sponsor(s) -------------------
-               checkboxGroupInput(
-                 "sponsor_check",
-                 "Sponsor(s)",
-                 choices = c(
-                   "Statistical Education",
-                   "Statistical Computing",
-                   "Statistical Graphics",
-                   "Statistical Learning and Data Science"
-                 ),
-                 selected = "Statistical Education"
+               # Select sponsor(s) ----------------------------------
+               selectInput(
+                 "sponsors",
+                 "Select sponsors",
+                 choices = sponsors,
+                 selected = "Section on Statistical Education",
+                 multiple = TRUE,
+                 selectize = TRUE
                ),
                
-               # Select other sponsor(s) -------------
-               textInput("sponsor_text",
-                         "For other sponsor(s) type keyword(s)"),
-               
-               # Select types(s) ---------------------
-               checkboxGroupInput(
+               # Select typess ------------------------------------
+               selectInput(
                  "type",
                  "Type(s)",
-                 choices = sort(unique(jsm_sessions$type)),
-                 selected = unique(jsm_sessions$type)
+                 choices = types,
+                 selected = str_subset(types, "Invited"),
+                 multiple = TRUE,
+                 selectize = TRUE
                ),
                
                width = 3
-               ),
+             ),
              
-             # Output --------------------------------
+             # Output -----------------------------------------------
              mainPanel(DT::dataTableOutput(outputId = "schedule"), width = 9)
              
            )),
@@ -85,32 +91,39 @@ ui <- navbarPage(
   tabPanel("Talk Finder",
            sidebarLayout(
              sidebarPanel(
-               h4("Search for keywords in talk/workshop titles:"),
+               # Instructions ---------------------------------------
+               h4("Search for keywords in talk/workshop titles."),
+               br(),
                
-               # Keyword selection -------------------------------------------
-               checkboxGroupInput("keyword_choice",
-                                  "Select keywords you're interested in",
-                                  choices = c(
-                                    "R"       = "( R | R$)", 
-                                    "tidy"    = "tidy", 
-                                    "Shiny"   = "shiny", 
-                                    "RStudio" = "(RStudio|R Studio)", 
-                                    "Python"  = "python"),
-                                  selected = "( R | R$)"),
+               # Keyword selection ----------------------------------
+               checkboxGroupInput(
+                 "keyword_choice",
+                 "Select keywords you're interested in",
+                 choices = c(
+                   "R"       = "( R | R$)",
+                   "tidy"    = "tidy",
+                   "Shiny"   = "shiny",
+                   "RStudio" = "(RStudio|R Studio)",
+                   "Python"  = "python"
+                 ),
+                 selected = "( R | R$)"
+               ),
                
-               # Other -------------------------------------------------------
-               textInput("keyword_text", 
-                         "Add additional keywords or phrases separated by commas"),
+               # Other ----------------------------------------------
+               textInput(
+                 "keyword_text",
+                 "Add additional keywords or phrases separated by commas"
+               ),
                
                br(),
                
-               # Excluded fee events -----------------------------------------
+               # Excluded fee events --------------------------------
                checkboxInput("exclude_fee",
                              "Exclude added fee events")
                
              ),
              
-             # Output --------------------------------------------------------
+             # Output -----------------------------------------------
              mainPanel(DT::dataTableOutput(outputId = "talks"))
              
            ))
@@ -125,13 +138,8 @@ server <- function(input, output) {
     req(input$day)
     req(input$type)
     # Wrangle sponsor text ------------------------------------------
-    sponsor_check_string <- glue_collapse(req(input$sponsor_check), sep = "|")
-    sponsor_text_string <- str_replace_all(input$sponsor_text, " ", "|")
-    sponsor_string <- ifelse(
-      sponsor_text_string == "",
-      sponsor_check_string,
-      glue(sponsor_check_string, sponsor_text_string, .sep = "|")
-      )
+    sponsor_string <- glue_collapse(input$sponsors, sep = "|")
+    cat(paste(sponsor_string, "\n"))
     # Filter and tabulate data --------------------------------------
     jsm_sessions %>%
       filter(
@@ -139,7 +147,7 @@ server <- function(input, output) {
         type %in% input$type,
         beg_time_round >= input$time[1],
         end_time_round <= input$time[2],
-        str_detect(tolower(sponsor), tolower(sponsor_string))
+        str_detect(sponsor, sponsor_string)
       ) %>%
       mutate(
         date_time = glue("{day}, {date}<br/>{time}"),
@@ -147,16 +155,19 @@ server <- function(input, output) {
       ) %>%
       select(date_time, session, location, type, sponsor) %>%
       DT::datatable(rownames = FALSE, escape = FALSE) %>%
-      formatStyle(columns = "date_time", fontSize = "80%", width = "100px") %>%
+      formatStyle(columns = "date_time",
+                  fontSize = "80%",
+                  width = "100px") %>%
       formatStyle(columns = "session", width = "450px") %>%
       formatStyle(columns = c("location", "type"), width = "100px") %>%
-      formatStyle(columns = "sponsor", fontSize = "80%", width = "200px")
+      formatStyle(columns = "sponsor",
+                  fontSize = "80%",
+                  width = "200px")
     
   })
   
   # Talks -----------------------------------------------------------
   output$talks <- DT::renderDataTable({
-    
     # Exclude fee events
     if (input$exclude_fee) {
       jsm_talks <- jsm_talks %>% filter(has_fee == FALSE)
@@ -167,17 +178,17 @@ server <- function(input, output) {
       str_split(",") %>%
       pluck(1) %>%
       str_trim() %>%
-      discard(~.x == "")
+      discard( ~ .x == "")
     
     keyword_regex <- c(input$keyword_choice, keywords)
-
-    if (length(keyword_regex) == 0){
+    
+    if (length(keyword_regex) == 0) {
       keyword_regex = ""
     }
     
     matching_titles <- keyword_regex %>%
       tolower() %>%
-      map(str_detect, string=tolower(jsm_talks$title)) %>%
+      map(str_detect, string = tolower(jsm_talks$title)) %>%
       reduce(`&`)
     
     # Subset for pattern
@@ -185,7 +196,11 @@ server <- function(input, output) {
       filter(matching_titles) %>%
       mutate(title = glue('<a href="{url}">{title}</a>')) %>%
       select(title) %>%
-      DT::datatable(rownames = FALSE, escape = FALSE, options = list(dom = "tp"))
+      DT::datatable(
+        rownames = FALSE,
+        escape = FALSE,
+        options = list(dom = "tp")
+      )
     
   })
 }
