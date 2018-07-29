@@ -39,22 +39,12 @@ ui <- navbarPage(
                  selected = "Sun"
                ),
                
-               # Select start and end time -----------
                sliderInput(
-                 "beg_time",
-                 "Start time",
+                 "time",
+                 "Time range",
                  min = 7,
                  max = 23,
-                 value = 8,
-                 step = 1
-               ),
-               
-               sliderInput(
-                 "end_time",
-                 "End time",
-                 min = 7,
-                 max = 23,
-                 value = 17,
+                 value = c(8, 12),
                  step = 1
                ),
                
@@ -147,8 +137,8 @@ server <- function(input, output) {
       filter(
         day %in% input$day,
         type %in% input$type,
-        beg_time_round >= input$beg_time,
-        end_time_round <= input$end_time,
+        beg_time_round >= input$time[1],
+        end_time_round <= input$time[2],
         str_detect(tolower(sponsor), tolower(sponsor_string))
       ) %>%
       mutate(
