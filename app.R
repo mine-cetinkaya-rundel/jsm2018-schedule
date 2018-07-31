@@ -183,7 +183,7 @@ server <- function(input, output) {
       ) %>%
       mutate(
         date_time = glue("{day}, {date}<br/>{time}"),
-        session = glue('<a href="{url}">{session}</a>')
+        session = glue('<a href="{url}" target="_blank">{session}</a>')
       ) %>%
       select(date_time, session, location, type, sponsor) %>%
       DT::datatable(rownames = FALSE, escape = FALSE) %>%
@@ -226,7 +226,7 @@ server <- function(input, output) {
     # Subset for pattern
     jsm_talks %>%
       filter(matching_titles) %>%
-      mutate(title = glue('<a href="{url}">{title}</a>')) %>%
+      mutate(title = glue('<a href="{url}" target="_blank">{title}</a>')) %>%
       select(title) %>%
       DT::datatable(
         rownames = FALSE,
